@@ -59,13 +59,23 @@
     box-sizing: border-box;
 }
 
+html {
+    overflow: auto;
+    height: auto;
+    -webkit-text-size-adjust: 100%; /* Prevent font scaling on iOS */
+}
+
 body {
     font-family: var(--font-mono);
     background: var(--bg-primary);
     color: var(--text-primary);
-    overflow: hidden;
-    height: 100vh;
+    overflow: auto;
+    overflow-x: hidden; /* Prevent horizontal scroll */
+    min-height: 100vh;
+    height: auto;
     position: relative;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    touch-action: pan-y pinch-zoom; /* Allow vertical scrolling and pinch zoom */
 }
 
 /* Background Effects */
@@ -82,6 +92,7 @@ body {
     opacity: 0.1;
     z-index: -2;
     animation: gridPulse 4s ease-in-out infinite;
+    pointer-events: none; /* Don't block touch events */
 }
 
 @keyframes gridPulse {
@@ -106,6 +117,7 @@ body {
         transparent 50%
     );
     z-index: -1;
+    pointer-events: none; /* Don't block touch events */
 }
 
 .scan-line {
@@ -136,7 +148,7 @@ body {
    ================================================ */
 
 .terminal-container {
-    height: 100vh;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     padding: var(--spacing-md);
@@ -357,7 +369,7 @@ body {
     grid-template-columns: 280px 1fr 320px;
     grid-template-rows: 1fr 250px;
     gap: var(--spacing-md);
-    overflow: hidden;
+    overflow: visible;
 }
 
 /* ================================================
@@ -1293,12 +1305,132 @@ body {
     .dashboard-grid {
         grid-template-columns: 1fr;
         grid-template-rows: auto;
+        overflow: visible;
     }
     
     .liquidation-panel,
     .orderbook-panel {
         grid-column: 1;
         grid-row: auto;
+        max-height: 500px;
+    }
+    
+    .panel-content {
+        max-height: 400px;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Mobile-specific fixes */
+    body {
+        overflow-x: hidden;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .terminal-container {
+        padding: var(--spacing-sm);
+        gap: var(--spacing-sm);
+        overflow: visible;
+    }
+    
+    .top-bar {
+        flex-wrap: wrap;
+        gap: var(--spacing-sm);
+        padding: var(--spacing-sm);
+    }
+    
+    .symbol-selector {
+        flex-direction: column;
+        width: 100%;
+        gap: var(--spacing-sm);
+    }
+    
+    .metrics-bar {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-sm);
+        width: 100%;
+    }
+    
+    .timeframe-group {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .tf-btn {
+        flex: 1;
+        padding: var(--spacing-sm);
+    }
+    
+    .dashboard-grid {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-sm);
+        overflow: visible;
+    }
+    
+    .panel {
+        min-height: 300px;
+        max-height: none;
+    }
+    
+    .panel-content {
+        max-height: 400px;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Hide scan line on mobile (performance) */
+    .scan-line {
+        display: none;
+    }
+    
+    /* Reduce background effects on mobile */
+    .bg-grid {
+        opacity: 0.05;
+    }
+    
+    /* Make buttons more touch-friendly */
+    .ctrl-btn,
+    .panel-btn,
+    .tf-btn,
+    .chart-btn {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    /* Better modal on mobile */
+    .modal-content {
+        width: 95%;
+        max-height: 90vh;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Extra small screens */
+    .terminal-title {
+        font-size: 18px;
+    }
+    
+    .logo-icon {
+        font-size: 24px;
+    }
+    
+    .metric-card {
+        min-width: 90px;
+    }
+    
+    .metric-value {
+        font-size: 14px;
+    }
+    
+    .panel-title {
+        font-size: 14px;
+    }
+    
+    .control-buttons {
+        flex-wrap: wrap;
     }
 }
 
