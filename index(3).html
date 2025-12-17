@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoVault Terminal - Professional Trading Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Background Effects -->
+    <div class="bg-grid"></div>
+    <div class="bg-gradient"></div>
+    <div class="scan-line"></div>
+
+    <!-- Main Container -->
+    <div class="terminal-container">
+        
+        <!-- Top Bar -->
+        <header class="top-bar">
+            <div class="logo-section">
+                <div class="logo-icon">⬡</div>
+                <h1 class="terminal-title">CRYPTOVAULT<span class="terminal-version">v2.0</span></h1>
+            </div>
+            
+            <div class="symbol-selector">
+                <select id="symbol-select" class="terminal-select">
+                    <option value="BTCUSDT">BTC/USDT</option>
+                    <option value="ETHUSDT">ETH/USDT</option>
+                    <option value="SOLUSDT">SOL/USDT</option>
+                    <option value="WIFUSDT">WIF/USDT</option>
+                    <option value="BNBUSDT">BNB/USDT</option>
+                    <option value="XRPUSDT">XRP/USDT</option>
+                    <option value="ADAUSDT">ADA/USDT</option>
+                    <option value="DOGEUSDT">DOGE/USDT</option>
+                </select>
+                
+                <div class="timeframe-group">
+                    <button class="tf-btn" data-tf="1m">1m</button>
+                    <button class="tf-btn active" data-tf="5m">5m</button>
+                    <button class="tf-btn" data-tf="15m">15m</button>
+                    <button class="tf-btn" data-tf="1h">1h</button>
+                    <button class="tf-btn" data-tf="4h">4h</button>
+                </div>
+            </div>
+
+            <div class="metrics-bar">
+                <div class="metric-card">
+                    <span class="metric-label">PRICE</span>
+                    <span class="metric-value" id="current-price">--</span>
+                    <span class="metric-change" id="price-change">--</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-label">24H VOL</span>
+                    <span class="metric-value" id="volume-24h">--</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-label">FUNDING</span>
+                    <span class="metric-value" id="funding-rate">--</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-label">OI</span>
+                    <span class="metric-value" id="open-interest">--</span>
+                </div>
+            </div>
+
+            <div class="control-buttons">
+                <button class="ctrl-btn" id="screenshot-btn" title="Screenshot">📸</button>
+                <button class="ctrl-btn" id="export-btn" title="Export Data">💾</button>
+                <button class="ctrl-btn" id="settings-btn" title="Settings">⚙️</button>
+                <button class="ctrl-btn" id="alerts-btn" title="Alerts">🔔</button>
+            </div>
+        </header>
+
+        <!-- Main Grid Layout -->
+        <div class="dashboard-grid">
+            
+            <!-- Left Panel: Liquidation Feed -->
+            <aside class="panel liquidation-panel">
+                <div class="panel-header">
+                    <h3 class="panel-title">
+                        <span class="title-icon">⚡</span>
+                        LIQUIDATIONS
+                    </h3>
+                    <div class="panel-controls">
+                        <button class="panel-btn active" data-view="feed">FEED</button>
+                        <button class="panel-btn" data-view="heatmap">HEATMAP</button>
+                    </div>
+                </div>
+                <div class="panel-content">
+                    <!-- Liquidation Stats -->
+                    <div class="liq-stats">
+                        <div class="liq-stat long">
+                            <span class="stat-label">LONG LIQ (24h)</span>
+                            <span class="stat-value" id="long-liq-total">$0</span>
+                        </div>
+                        <div class="liq-stat short">
+                            <span class="stat-label">SHORT LIQ (24h)</span>
+                            <span class="stat-value" id="short-liq-total">$0</span>
+                        </div>
+                    </div>
+
+                    <!-- Liquidation Feed -->
+                    <div class="liquidation-feed" id="liquidation-feed">
+                        <!-- Dynamic content -->
+                    </div>
+
+                    <!-- Liquidation Heatmap -->
+                    <div class="liquidation-heatmap hidden" id="liquidation-heatmap">
+                        <canvas id="heatmap-canvas"></canvas>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Center Panel: Main Chart -->
+            <main class="panel chart-panel">
+                <div class="panel-header">
+                    <h3 class="panel-title">
+                        <span class="title-icon">📊</span>
+                        PRICE CHART
+                    </h3>
+                    <div class="chart-controls">
+                        <button class="chart-btn active" data-indicator="volume">VOLUME</button>
+                        <button class="chart-btn" data-indicator="cvd">CVD</button>
+                        <button class="chart-btn" data-indicator="vp">VOL PROFILE</button>
+                        <button class="chart-btn" data-indicator="sr">S/R LEVELS</button>
+                    </div>
+                </div>
+                <div class="panel-content chart-content">
+                    <div id="main-chart" class="trading-chart"></div>
+                    <div id="volume-chart" class="volume-chart"></div>
+                    <div id="cvd-chart" class="cvd-chart"></div>
+                </div>
+            </main>
+
+            <!-- Right Panel: Order Book -->
+            <aside class="panel orderbook-panel">
+                <div class="panel-header">
+                    <h3 class="panel-title">
+                        <span class="title-icon">📖</span>
+                        ORDER BOOK
+                    </h3>
+                    <div class="panel-controls">
+                        <select class="terminal-select-sm" id="orderbook-depth">
+                            <option value="20">20</option>
+                            <option value="50" selected>50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="panel-content orderbook-content">
+                    <!-- Order Book Imbalance Gauge -->
+                    <div class="imbalance-gauge">
+                        <div class="gauge-bar">
+                            <div class="gauge-fill" id="imbalance-fill"></div>
+                        </div>
+                        <div class="gauge-labels">
+                            <span class="gauge-label sell">SELL</span>
+                            <span class="gauge-value" id="imbalance-value">50/50</span>
+                            <span class="gauge-label buy">BUY</span>
+                        </div>
+                    </div>
+
+                    <!-- Order Book -->
+                    <div class="orderbook-grid">
+                        <div class="orderbook-header">
+                            <span>PRICE</span>
+                            <span>SIZE</span>
+                            <span>TOTAL</span>
+                        </div>
+                        
+                        <!-- Asks (Sells) -->
+                        <div class="orderbook-asks" id="orderbook-asks">
+                            <!-- Dynamic content -->
+                        </div>
+
+                        <!-- Spread -->
+                        <div class="orderbook-spread">
+                            <span class="spread-label">SPREAD</span>
+                            <span class="spread-value" id="spread-value">--</span>
+                        </div>
+
+                        <!-- Bids (Buys) -->
+                        <div class="orderbook-bids" id="orderbook-bids">
+                            <!-- Dynamic content -->
+                        </div>
+                    </div>
+
+                    <!-- Whale Walls -->
+                    <div class="whale-walls">
+                        <h4 class="subsection-title">WHALE WALLS</h4>
+                        <div id="whale-walls-list">
+                            <!-- Dynamic content -->
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Bottom Panel: Order Flow & Metrics -->
+            <section class="panel metrics-panel">
+                <div class="panel-header">
+                    <h3 class="panel-title">
+                        <span class="title-icon">📈</span>
+                        ORDER FLOW METRICS
+                    </h3>
+                    <div class="exchange-tabs">
+                        <button class="exchange-tab active" data-exchange="binance">BINANCE</button>
+                        <button class="exchange-tab" data-exchange="bybit">BYBIT</button>
+                        <button class="exchange-tab" data-exchange="okx">OKX</button>
+                        <button class="exchange-tab" data-exchange="all">ALL</button>
+                    </div>
+                </div>
+                <div class="panel-content metrics-content">
+                    
+                    <!-- CVD & Delta Metrics -->
+                    <div class="metrics-grid">
+                        <div class="metric-box">
+                            <span class="metric-box-label">CVD (Cumulative)</span>
+                            <span class="metric-box-value" id="cvd-value">--</span>
+                            <div class="metric-sparkline" id="cvd-sparkline"></div>
+                        </div>
+                        <div class="metric-box">
+                            <span class="metric-box-label">DELTA (1m)</span>
+                            <span class="metric-box-value" id="delta-1m">--</span>
+                        </div>
+                        <div class="metric-box">
+                            <span class="metric-box-label">DELTA (5m)</span>
+                            <span class="metric-box-value" id="delta-5m">--</span>
+                        </div>
+                        <div class="metric-box">
+                            <span class="metric-box-label">DELTA (15m)</span>
+                            <span class="metric-box-value" id="delta-15m">--</span>
+                        </div>
+                        <div class="metric-box">
+                            <span class="metric-box-label">BUY PRESSURE</span>
+                            <div class="pressure-bar">
+                                <div class="pressure-fill buy" id="buy-pressure"></div>
+                            </div>
+                        </div>
+                        <div class="metric-box">
+                            <span class="metric-box-label">SELL PRESSURE</span>
+                            <div class="pressure-bar">
+                                <div class="pressure-fill sell" id="sell-pressure"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Large Trades Feed -->
+                    <div class="trades-section">
+                        <h4 class="subsection-title">LARGE TRADES (WHALE TRACKING)</h4>
+                        <div class="trades-feed" id="large-trades-feed">
+                            <!-- Dynamic content -->
+                        </div>
+                    </div>
+
+                    <!-- Trade Size Distribution -->
+                    <div class="distribution-section">
+                        <h4 class="subsection-title">TRADE SIZE DISTRIBUTION</h4>
+                        <canvas id="distribution-chart"></canvas>
+                    </div>
+
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- Alert Modal -->
+    <div class="modal hidden" id="alert-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>CONFIGURE ALERTS</h3>
+                <button class="modal-close" id="alert-modal-close">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="alert-form">
+                    <div class="form-group">
+                        <label>Alert Type</label>
+                        <select id="alert-type">
+                            <option value="price">Price Level</option>
+                            <option value="liquidation">Liquidation Cascade</option>
+                            <option value="volume">Volume Spike</option>
+                            <option value="cvd">CVD Divergence</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Threshold</label>
+                        <input type="number" id="alert-threshold" placeholder="Enter value">
+                    </div>
+                    <div class="form-group">
+                        <label>Notification Method</label>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" id="alert-browser"> Browser</label>
+                            <label><input type="checkbox" id="alert-sound"> Sound</label>
+                            <label><input type="checkbox" id="alert-telegram"> Telegram</label>
+                        </div>
+                    </div>
+                    <button class="btn-primary" id="add-alert-btn">ADD ALERT</button>
+                </div>
+                <div class="active-alerts">
+                    <h4>ACTIVE ALERTS</h4>
+                    <div id="active-alerts-list">
+                        <!-- Dynamic content -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal hidden" id="settings-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>SETTINGS</h3>
+                <button class="modal-close" id="settings-modal-close">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-section">
+                    <h4>API CONFIGURATION</h4>
+                    <div class="form-group">
+                        <label>CoinGlass API Key</label>
+                        <input type="password" id="coinglass-key" placeholder="Enter API key">
+                    </div>
+                    <div class="form-group">
+                        <label>Telegram Bot Token</label>
+                        <input type="password" id="telegram-token" placeholder="Enter bot token">
+                    </div>
+                    <div class="form-group">
+                        <label>Telegram Chat ID</label>
+                        <input type="text" id="telegram-chat" placeholder="Enter chat ID">
+                    </div>
+                </div>
+                <div class="settings-section">
+                    <h4>DISPLAY OPTIONS</h4>
+                    <div class="form-group">
+                        <label><input type="checkbox" id="show-grid"> Show Grid Lines</label>
+                        <label><input type="checkbox" id="show-volume"> Show Volume Bars</label>
+                        <label><input type="checkbox" id="show-cvd"> Show CVD Indicator</label>
+                        <label><input type="checkbox" id="auto-scale"> Auto-scale Charts</label>
+                    </div>
+                </div>
+                <button class="btn-primary" id="save-settings-btn">SAVE SETTINGS</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p>INITIALIZING TERMINAL...</p>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
+    <script src="config.js"></script>
+    <script src="utils.js"></script>
+    <script src="websocket-manager.js"></script>
+    <script src="api-manager.js"></script>
+    <script src="chart-manager.js"></script>
+    <script src="orderbook-manager.js"></script>
+    <script src="liquidation-manager.js"></script>
+    <script src="metrics-manager.js"></script>
+    <script src="alert-manager.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>
